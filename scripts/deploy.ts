@@ -51,37 +51,37 @@ async function getChangelogContent(version: string): Promise<string> {
         const versionHeader = `## [${version}]`;
         console.log('Looking for version header:', versionHeader);
         
-        // Extract the section for the current version
-        let currentVersionContent = '';
-        let isInVersionSection = false;
+        // Split content into lines and find the section
         const lines = changelogContent.split('\n');
+        let content = [];
+        let isInSection = false;
         
         for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
+            const line = lines[i].trim();
             
-            if (line.startsWith(versionHeader)) {
-                isInVersionSection = true;
-                // Skip the version header line
+            // Start capturing at the version header
+            if (line === versionHeader || line.startsWith(`${versionHeader} -`)) {
+                isInSection = true;
                 continue;
-            } else if (isInVersionSection && line.startsWith('## [')) {
+            }
+            // Stop when we hit the next version header
+            else if (isInSection && line.startsWith('## [')) {
                 break;
             }
-            
-            if (isInVersionSection && line.trim() !== '') {
-                currentVersionContent += line + '\n';
+            // Capture content while in the right section
+            else if (isInSection && line !== '') {
+                content.push(line);
             }
         }
 
-        if (!currentVersionContent) {
+        const result = content.join('\n');
+        if (!result) {
             console.log('No content found for version', version);
             return '';
         }
 
-        // Remove any trailing newlines
-        currentVersionContent = currentVersionContent.trim();
-
-        console.log('Final changelog content:', currentVersionContent);
-        return currentVersionContent;
+        console.log('Final changelog content:', result);
+        return result;
     } catch (error) {
         console.error('Error reading changelog:', error);
         return '';
