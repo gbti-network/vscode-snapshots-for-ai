@@ -2,6 +2,12 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.15] - 2024-12-08
+### Added
+- Additional logging for release process
+### Fixed
+- Further improvements to changelog integration
+
 ## [8.1.14] - 2024-12-08
 ### Fixed
 - Fixed changelog content extraction for releases

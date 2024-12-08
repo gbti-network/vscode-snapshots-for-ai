@@ -43,28 +43,36 @@ async function getChangelogNotes(version: string): Promise<string> {
 
 async function getChangelogContent(version: string): Promise<string> {
     const changelogPath = path.join(__dirname, '..', '.product', 'changelog.md');
+    console.log('Reading changelog from:', changelogPath);
     const changelog = fs.readFileSync(changelogPath, 'utf8');
     
     // Find the section for this version
     const versionHeader = `## [${version}]`;
+    console.log('Looking for version header:', versionHeader);
     const lines = changelog.split('\n');
     let content = [];
     let isInVersion = false;
     
     for (const line of lines) {
         if (line.startsWith('## [')) {
+            console.log('Found header line:', line);
             if (!isInVersion && line.startsWith(versionHeader)) {
+                console.log('Starting version section');
                 isInVersion = true;
             } else if (isInVersion) {
+                console.log('Ending version section');
                 break;
             }
         }
         if (isInVersion) {
+            console.log('Adding line:', line);
             content.push(line);
         }
     }
     
-    return content.join('\n').trim();
+    const result = content.join('\n').trim();
+    console.log('Final changelog content:', result);
+    return result;
 }
 
 async function createGitHubRelease(version: string, notes: string) {
