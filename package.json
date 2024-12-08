@@ -2,7 +2,7 @@
   "name": "snapshots-for-ai",
   "displayName": "Snapshots for AI",
   "description": "Create markdown snapshots of your code for AI interactions",
-  "version": "8.1.4",
+  "version": "8.1.6",
   "publisher": "GBTI",
   "icon": "resources/camera.png",
   "repository": {
@@ -70,6 +70,7 @@
     "deploy:major": "ts-node -P scripts/tsconfig.json scripts/deploy.ts major"
   },
   "devDependencies": {
+    "@octokit/rest": "^21.0.2",
     "@types/node": "20.10.4",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
@@ -78,6 +79,7 @@
     "@vscode/vsce": "^2.22.0",
     "dotenv": "^16.4.7",
     "eslint": "^8.55.0",
+    "ovsx": "^0.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },

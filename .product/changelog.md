@@ -2,6 +2,15 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.4] - 2024-12-08
+### Added
+- Automated GitHub release creation
+- Improved deployment workflow
+
+### Changed
+- Enhanced publish script to handle releases more efficiently
+- Updated dependencies
+
 ## [8.1.2] - 2024-12-08
 ### Fixed
 - Fixed demo.gif image path in README.md to use relative path
