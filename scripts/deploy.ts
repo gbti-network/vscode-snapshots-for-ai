@@ -47,28 +47,27 @@ async function getChangelogContent(version: string): Promise<string> {
         console.log('Reading changelog from:', changelogPath);
         const changelogContent = fs.readFileSync(changelogPath, 'utf8');
 
-        // Split the changelog into sections by version headers
-        const sections = changelogContent.split(/^## \[/m);
-        
         // Find the section for the current version
         const versionHeader = `## [${version}]`;
         console.log('Looking for version header:', versionHeader);
         
         // Extract the section for the current version
         let currentVersionContent = '';
-        const lines = changelogContent.split('\n');
         let isInVersionSection = false;
+        const lines = changelogContent.split('\n');
         
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             
             if (line.startsWith(versionHeader)) {
                 isInVersionSection = true;
-                currentVersionContent = line + '\n';
-            } else if (isInVersionSection) {
-                if (line.startsWith('## [')) {
-                    break;
-                }
+                // Skip the version header line
+                continue;
+            } else if (isInVersionSection && line.startsWith('## [')) {
+                break;
+            }
+            
+            if (isInVersionSection && line.trim() !== '') {
                 currentVersionContent += line + '\n';
             }
         }
@@ -77,6 +76,9 @@ async function getChangelogContent(version: string): Promise<string> {
             console.log('No content found for version', version);
             return '';
         }
+
+        // Remove any trailing newlines
+        currentVersionContent = currentVersionContent.trim();
 
         console.log('Final changelog content:', currentVersionContent);
         return currentVersionContent;
@@ -239,13 +241,17 @@ async function deploy() {
         const newVersion = incrementVersion(currentVersion, versionType as 'major' | 'minor' | 'patch');
         console.log(`Incremented version to ${newVersion} (${versionType})`);
 
+        // Get changelog content before updating package.json
+        const changelogContent = await getChangelogContent(newVersion);
+        if (!changelogContent) {
+            console.error(`No changelog entry found for version ${newVersion}. Please add a changelog entry first.`);
+            process.exit(1);
+        }
+        console.log('Changelog content:', changelogContent);
+
         // Update package.json with new version
         packageJson.version = newVersion;
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-
-        // Get changelog content before committing
-        const changelogContent = await getChangelogContent(newVersion);
-        console.log('Changelog content:', changelogContent);
 
         if (!githubOnly) {
             // Clean and prepare

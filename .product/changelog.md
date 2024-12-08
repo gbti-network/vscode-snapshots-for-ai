@@ -2,67 +2,15 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
-## [8.1.21] - 2024-12-08
-### Changed
-- Improved GitHub release creation using temporary file
-- Enhanced Windows compatibility for deployment script
-
-## [8.1.20] - 2024-12-08
+## [8.1.23] - 2024-12-08
 ### Fixed
-- Further improvements to JSON escaping in GitHub release creation
-- Enhanced Windows compatibility for deployment script
-
-## [8.1.19] - 2024-12-08
-### Fixed
-- Fixed JSON escaping in GitHub release creation
-- Improved Windows compatibility for deployment script
-
-## [8.1.18] - 2024-12-08
-### Changed
-- Further improvements to changelog handling in deployment script
-- Enhanced GitHub release notes integration
-
-## [8.1.17] - 2024-12-08
-### Changed
-- Improved changelog handling in deployment script
-- Added detailed logging for debugging
-- Fixed GitHub release notes integration
-
-## [8.1.16] - 2024-12-08
-### Changed
-- Improved changelog handling in deployment script
-- Added detailed logging for debugging
-
-## [8.1.15] - 2024-12-08
-### Added
-- Additional logging for release process
-### Fixed
-- Further improvements to changelog integration
-
-## [8.1.14] - 2024-12-08
-### Fixed
-- Fixed changelog content extraction for releases
+- Fixed changelog content extraction for GitHub releases
 - Improved release notes formatting
 
-## [8.1.13] - 2024-12-08
+## [8.1.22] - 2024-12-08
 ### Fixed
-- Improved JSON handling in GitHub release creation
-- Added detailed logging for release process
-
-## [8.1.12] - 2024-12-08
-### Fixed
-- Corrected changelog integration in GitHub releases
-- Improved version tracking in deployment script
-
-## [8.1.11] - 2024-12-08
-### Changed
-- Added GitHub-only deployment mode
-- Fixed changelog integration in releases
-
-## [8.1.10] - 2024-12-08
-### Changed
-- Further improvements to GitHub release creation process
-- Enhanced changelog integration in releases
+- Improved changelog content extraction for GitHub releases
+- Added validation for changelog entries before release
 
 ## [8.1.9] - 2024-12-08
 ### Changed
