@@ -75,54 +75,35 @@ async function getChangelogContent(version: string): Promise<string> {
     return result;
 }
 
-async function createGitHubRelease(version: string, notes: string) {
-    const token = process.env.GITHUB_TOKEN;
-    if (!token) {
-        console.warn('GITHUB_TOKEN not found. Skipping GitHub release.');
-        return;
-    }
-
+async function createGitHubRelease(version: string, changelogContent: string) {
     try {
-        // Create and push tag
-        await execAsync(`git tag -a v${version} -m "Release v${version}"`);
-        console.log(`Created tag v${version}`);
-        
-        // Add all changes
-        await execAsync('git add .');
+        const tag = `v${version}`;
+        console.log(`Creating tag ${tag}`);
+        await execAsync(`git tag ${tag}`);
         console.log('Added changes');
-        
-        // Commit changes
-        await execAsync(`git commit -m "Release v${version}"`);
+        await execAsync('git add .');
+        await execAsync('git commit -m "Release ' + tag + '"');
         console.log('Committed changes');
-        
-        // Push changes and tags
         await execAsync('git push origin main --tags');
         console.log('Pushed changes and tags');
 
-        // Create GitHub release using curl
+        // Create GitHub release with changelog content
+        console.log('Release notes:', changelogContent);
         const releaseData = {
-            tag_name: `v${version}`,
-            name: `Release v${version}`,
-            body: notes,
+            tag_name: tag,
+            name: `Release ${tag}`,
+            body: changelogContent || '',
             draft: false,
             prerelease: false
         };
 
-        console.log('Release notes:', notes);
-        
-        // Convert to JSON and escape properly for Windows cmd
-        const jsonData = JSON.stringify(releaseData)
-            .replace(/"/g, '\\"')
-            .replace(/\$/g, '\\$');
-
-        const curlCommand = `curl -v -X POST -H "Authorization: token ${token}" -H "Content-Type: application/json" -d "${jsonData}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
-        
-        const result = await execAsync(curlCommand);
-        console.log('Curl response:', result);
+        const curlCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d '${JSON.stringify(releaseData)}' https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        const response = await execAsync(curlCommand);
+        console.log('Curl response:', response);
         console.log('Created GitHub release');
-        console.log(`GitHub release v${version} created successfully!`);
+        console.log(`GitHub release ${tag} created successfully!`);
     } catch (error) {
-        console.error('Error creating GitHub release:', error);
+        console.error('Failed to create GitHub release:', error);
         throw error;
     }
 }
