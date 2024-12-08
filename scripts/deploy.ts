@@ -97,7 +97,14 @@ async function createGitHubRelease(version: string, changelogContent: string) {
             prerelease: false
         };
 
-        const curlCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d '${JSON.stringify(releaseData)}' https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        // Convert to JSON and escape properly for Windows cmd
+        const jsonData = JSON.stringify(releaseData)
+            .replace(/"/g, '\\"')
+            .replace(/\$/g, '\\$')
+            .replace(/\r/g, '')
+            .replace(/\n/g, '\\n');
+
+        const curlCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "${jsonData}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
         const response = await execAsync(curlCommand);
         console.log('Curl response:', response);
         console.log('Created GitHub release');
