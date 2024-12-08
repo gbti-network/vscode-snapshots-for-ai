@@ -91,14 +91,11 @@ async function createGitHubRelease(version: string, notes: string) {
         await execAsync('git push origin main --tags');
         console.log('Pushed changes and tags');
 
-        // Get changelog content for this version
-        const changelogContent = await getChangelogContent(version);
-        
         // Create GitHub release using curl
         const releaseData = JSON.stringify({
             tag_name: `v${version}`,
             name: `Release v${version}`,
-            body: changelogContent || notes, // Use changelog if available, otherwise use notes
+            body: notes, 
             draft: false,
             prerelease: false
         }).replace(/"/g, '\\"');
@@ -268,8 +265,9 @@ async function deploy() {
             console.log('Extension packaged successfully');
         }
 
-        // Create GitHub release
-        await createGitHubRelease(newVersion, await getReleaseNotes());
+        // Create GitHub release with changelog content
+        const changelogContent = await getChangelogContent(newVersion);
+        await createGitHubRelease(newVersion, changelogContent);
 
         if (shouldPublish && !githubOnly) {
             console.log('Publishing extension...');
