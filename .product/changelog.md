@@ -2,6 +2,10 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.27] - 2024-12-08
+### Fixed
+- Fixing Bugherd link.
+
 ## [8.1.26] - 2024-12-08
 ### Fixed
 - Fixed changelog content extraction for GitHub releases
