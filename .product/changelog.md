@@ -2,6 +2,11 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.12] - 2024-12-08
+### Fixed
+- Corrected changelog integration in GitHub releases
+- Improved version tracking in deployment script
+
 ## [8.1.11] - 2024-12-08
 ### Changed
 - Added GitHub-only deployment mode
