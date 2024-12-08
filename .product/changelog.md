@@ -2,6 +2,11 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.20] - 2024-12-08
+### Fixed
+- Further improvements to JSON escaping in GitHub release creation
+- Enhanced Windows compatibility for deployment script
+
 ## [8.1.19] - 2024-12-08
 ### Fixed
 - Fixed JSON escaping in GitHub release creation

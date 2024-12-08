@@ -97,15 +97,17 @@ async function createGitHubRelease(version: string, changelogContent: string) {
             prerelease: false
         };
 
-        // Convert to JSON and escape properly for Windows cmd
-        const jsonData = JSON.stringify(releaseData)
-            .replace(/"/g, '\\"')
-            .replace(/\$/g, '\\$')
-            .replace(/\r/g, '')
-            .replace(/\n/g, '\\n');
+        // Write JSON data to a temporary file
+        const tempFile = path.join(__dirname, 'release-data.json');
+        fs.writeFileSync(tempFile, JSON.stringify(releaseData));
 
-        const curlCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "${jsonData}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        // Use the temporary file in the curl command
+        const curlCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "@${tempFile}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
         const response = await execAsync(curlCommand);
+        
+        // Clean up the temporary file
+        fs.unlinkSync(tempFile);
+
         console.log('Curl response:', response);
         console.log('Created GitHub release');
         console.log(`GitHub release ${tag} created successfully!`);
