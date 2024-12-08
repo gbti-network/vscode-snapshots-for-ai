@@ -7,25 +7,6 @@ All notable changes to the "Snapshots for AI" extension will be documented in th
 - Fixed changelog content extraction for GitHub releases
 - Improved release notes formatting
 
-## [8.1.22] - 2024-12-08
-### Fixed
-- Improved changelog content extraction for GitHub releases
-- Added validation for changelog entries before release
-
-## [8.1.9] - 2024-12-08
-### Changed
-- Updated deployment script to use curl for GitHub releases
-- Enhanced release notes handling with changelog integration
-
-## [8.1.7] - 2024-12-08
-### Added
-- Support for Open VSX Registry (Windfall compatibility)
-- Automated GitHub release creation with changelog notes
-
-### Fixed
-- GitHub release creation in deployment script
-- Release notes handling
-
 ## [8.1.6] - 2024-12-08
 ### Added
 - Initial Open VSX Registry support

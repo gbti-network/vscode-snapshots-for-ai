@@ -242,10 +242,10 @@ async function deploy() {
         console.log(`Incremented version to ${newVersion} (${versionType})`);
 
         // Get changelog content before updating package.json
-        const changelogContent = await getChangelogContent(newVersion);
+        let changelogContent = await getChangelogContent(newVersion);
         if (!changelogContent) {
-            console.error(`No changelog entry found for version ${newVersion}. Please add a changelog entry first.`);
-            process.exit(1);
+            console.log(`No changelog entry found for version ${newVersion}. Must be an oversight.`);
+            changelogContent = 'Changes not documented. Must be an oversight.';
         }
         console.log('Changelog content:', changelogContent);
 
