@@ -53,13 +53,13 @@ async function getChangelogContent(version: string): Promise<string> {
     
     for (const line of lines) {
         if (line.startsWith('## [')) {
-            if (line.startsWith(versionHeader)) {
+            if (!isInVersion && line.startsWith(versionHeader)) {
                 isInVersion = true;
-                content.push(line);
             } else if (isInVersion) {
                 break;
             }
-        } else if (isInVersion) {
+        }
+        if (isInVersion) {
             content.push(line);
         }
     }
