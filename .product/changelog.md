@@ -2,6 +2,24 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.7] - 2024-12-08
+### Added
+- Support for Open VSX Registry (Windfall compatibility)
+- Automated GitHub release creation with changelog notes
+
+### Fixed
+- GitHub release creation in deployment script
+- Release notes handling
+
+## [8.1.6] - 2024-12-08
+### Added
+- Initial Open VSX Registry support
+- Enhanced deployment workflow
+
+### Changed
+- Updated deployment script for multi-platform publishing
+- Improved release process
+
 ## [8.1.4] - 2024-12-08
 ### Added
 - Automated GitHub release creation
