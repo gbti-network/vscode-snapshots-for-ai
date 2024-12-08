@@ -2,7 +2,7 @@
   "name": "snapshots-for-ai",
   "displayName": "Snapshots for AI",
   "description": "Create markdown snapshots of your code for AI interactions",
-  "version": "8.1.10",
+  "version": "8.1.11",
   "publisher": "GBTI",
   "icon": "resources/camera.png",
   "repository": {

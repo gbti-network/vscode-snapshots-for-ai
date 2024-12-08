@@ -114,47 +114,45 @@ async function createGitHubRelease(version: string, notes: string) {
     }
 }
 
-async function incrementVersion(): Promise<VersionChange> {
-    const packageJsonPath = path.join(__dirname, '..', 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    const currentVersion = packageJson.version.split('.').map(Number);
-    const newVersion = [...currentVersion];
-    
-    // Determine which part to increment based on command line args
-    const arg = process.argv[2] || 'patch';
-    let type: 'major' | 'minor' | 'patch' = 'patch';
-    
-    switch (arg) {
+function incrementVersion(currentVersion: string, versionType: 'major' | 'minor' | 'patch'): string {
+    const versionParts = currentVersion.split('.').map(Number);
+    switch (versionType) {
         case 'major':
-            newVersion[0]++;
-            newVersion[1] = 0;
-            newVersion[2] = 0;
-            type = 'major';
+            versionParts[0]++;
+            versionParts[1] = 0;
+            versionParts[2] = 0;
             break;
         case 'minor':
-            newVersion[1]++;
-            newVersion[2] = 0;
-            type = 'minor';
+            versionParts[1]++;
+            versionParts[2] = 0;
             break;
         default:
-            newVersion[2]++;
-            type = 'patch';
+            versionParts[2]++;
     }
-    
-    const version = newVersion.join('.');
-    packageJson.version = version;
-    
-    // Update publisher from environment variable
-    if (process.env.VSCODE_PUBLISHER_ID) {
-        packageJson.publisher = process.env.VSCODE_PUBLISHER_ID;
-    }
-    
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-    console.log(`Incremented version to ${version} (${type})`);
+    return versionParts.join('.');
+}
 
-    const notes = await getChangelogNotes(version);
-    
-    return { version, type, notes };
+async function getReleaseNotes(): Promise<string> {
+    const changelogPath = path.join(__dirname, '..', '.product', 'changelog.md');
+    const changelog = fs.readFileSync(changelogPath, 'utf8');
+    const lines = changelog.split('\n');
+    let notes = '';
+    let isCurrentVersion = false;
+
+    for (const line of lines) {
+        if (line.startsWith('## [')) {
+            if (isCurrentVersion) {
+                break;
+            }
+            isCurrentVersion = true;
+            continue;
+        }
+        if (isCurrentVersion && line.trim()) {
+            notes += line + '\n';
+        }
+    }
+
+    return notes.trim();
 }
 
 async function cleanDirectories() {
@@ -226,45 +224,63 @@ async function publishToOpenVSX() {
 
 async function deploy() {
     try {
-        // Validate environment variables
-        if (!process.env.VSCODE_PUBLISHER_ID) {
-            throw new Error('VSCODE_PUBLISHER_ID environment variable is required');
+        const args = process.argv.slice(2);
+        const versionType = args[0] || 'patch';
+        const shouldPublish = args.includes('--publish');
+        const githubOnly = args.includes('--github-only');
+
+        if (!['major', 'minor', 'patch'].includes(versionType)) {
+            console.error('Invalid version type. Use: major, minor, or patch');
+            process.exit(1);
         }
 
-        // 1. Increment version and get changelog notes
-        const { version, type, notes } = await incrementVersion();
+        // Get current version
+        const packageJsonPath = path.join(__dirname, '..', 'package.json');
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+        const currentVersion = packageJson.version;
 
-        // 2. Clean directories
-        await cleanDirectories();
-        console.log('Cleaned output directories');
+        // Increment version
+        const newVersion = incrementVersion(currentVersion, versionType as 'major' | 'minor' | 'patch');
+        console.log(`Incremented version to ${newVersion} (${versionType})`);
 
-        // 3. Install dependencies
-        await installDependencies();
-        console.log('Dependencies installed');
+        // Update package.json with new version
+        packageJson.version = newVersion;
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-        // 4. Compile TypeScript
-        await compileTypeScript();
-        console.log('TypeScript compilation successful');
+        if (!githubOnly) {
+            // Clean and prepare
+            console.log('Cleaned output directories');
+            await cleanDirectories();
 
-        // 5. Package extension
-        await packageExtension();
-        console.log('Extension packaged successfully');
+            // Install dependencies
+            console.log('Installing dependencies...');
+            await installDependencies();
+            console.log('Dependencies installed');
 
-        // 6. Create GitHub release
-        await createGitHubRelease(version, notes);
+            // Compile TypeScript
+            console.log('Compiling TypeScript...');
+            await compileTypeScript();
+            console.log('TypeScript compilation successful');
 
-        // 7. Publish if it's not a patch or if --publish flag is present
-        const shouldPublish = type !== 'patch' || process.argv.includes('--publish');
-        if (shouldPublish) {
+            // Package extension
+            console.log('Packaging extension...');
+            await packageExtension();
+            console.log('Extension packaged successfully');
+        }
+
+        // Create GitHub release
+        await createGitHubRelease(newVersion, await getReleaseNotes());
+
+        if (shouldPublish && !githubOnly) {
+            console.log('Publishing extension...');
             // Publish to VS Code Marketplace
             await publishExtension();
             console.log('Extension published to VS Code Marketplace');
 
-            // Publish to Open VSX Registry (for Windfall)
+            // Publish to Open VSX Registry
             await publishToOpenVSX();
             console.log('Extension published to Open VSX Registry');
-        } else {
-            console.log('Patch version update - skipping publish');
+            console.log('Published to Open VSX Registry successfully');
         }
 
         console.log('Deployment completed successfully!');

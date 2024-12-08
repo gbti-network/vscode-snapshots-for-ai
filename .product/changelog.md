@@ -2,6 +2,11 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.10] - 2024-12-08
+### Changed
+- Further improvements to GitHub release creation process
+- Enhanced changelog integration in releases
+
 ## [8.1.9] - 2024-12-08
 ### Changed
 - Updated deployment script to use curl for GitHub releases
