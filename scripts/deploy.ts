@@ -42,37 +42,48 @@ async function getChangelogNotes(version: string): Promise<string> {
 }
 
 async function getChangelogContent(version: string): Promise<string> {
-    const changelogPath = path.join(__dirname, '..', '.product', 'changelog.md');
-    console.log('Reading changelog from:', changelogPath);
-    const changelog = fs.readFileSync(changelogPath, 'utf8');
-    
-    // Find the section for this version
-    const versionHeader = `## [${version}]`;
-    console.log('Looking for version header:', versionHeader);
-    const lines = changelog.split('\n');
-    let content = [];
-    let isInVersion = false;
-    
-    for (const line of lines) {
-        if (line.startsWith('## [')) {
-            console.log('Found header line:', line);
-            if (!isInVersion && line.startsWith(versionHeader)) {
-                console.log('Starting version section');
-                isInVersion = true;
-            } else if (isInVersion) {
-                console.log('Ending version section');
-                break;
+    try {
+        const changelogPath = path.join(__dirname, '..', '.product', 'changelog.md');
+        console.log('Reading changelog from:', changelogPath);
+        const changelogContent = fs.readFileSync(changelogPath, 'utf8');
+
+        // Split the changelog into sections by version headers
+        const sections = changelogContent.split(/^## \[/m);
+        
+        // Find the section for the current version
+        const versionHeader = `## [${version}]`;
+        console.log('Looking for version header:', versionHeader);
+        
+        // Extract the section for the current version
+        let currentVersionContent = '';
+        const lines = changelogContent.split('\n');
+        let isInVersionSection = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            
+            if (line.startsWith(versionHeader)) {
+                isInVersionSection = true;
+                currentVersionContent = line + '\n';
+            } else if (isInVersionSection) {
+                if (line.startsWith('## [')) {
+                    break;
+                }
+                currentVersionContent += line + '\n';
             }
         }
-        if (isInVersion) {
-            console.log('Adding line:', line);
-            content.push(line);
+
+        if (!currentVersionContent) {
+            console.log('No content found for version', version);
+            return '';
         }
+
+        console.log('Final changelog content:', currentVersionContent);
+        return currentVersionContent;
+    } catch (error) {
+        console.error('Error reading changelog:', error);
+        return '';
     }
-    
-    const result = content.join('\n').trim();
-    console.log('Final changelog content:', result);
-    return result;
 }
 
 async function createGitHubRelease(version: string, changelogContent: string) {
