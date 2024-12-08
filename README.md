@@ -2,7 +2,7 @@
 
 Create perfect code context for AI interactions! This powerful extension helps you generate well-formatted markdown snapshots of your code, making it easier to share context with AI assistants like ChatGPT, Claude, and others.
 
-![Snapshot Demo](resources/marketplace/demo.gif)
+![Snapshot Demo](https://github.com/gbti-network/vscode-snapshots-for-ai/raw/HEAD/resources/marketplace/demo.gif)
 
 ## ✨ Key Features
 

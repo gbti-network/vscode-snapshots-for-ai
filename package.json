@@ -2,12 +2,12 @@
   "name": "snapshots-for-ai",
   "displayName": "Snapshots for AI",
   "description": "Create markdown snapshots of your code for AI interactions",
-  "version": "8.0.41",
-  "publisher": "gbti",
+  "version": "8.1.4",
+  "publisher": "GBTI",
   "icon": "resources/camera.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gbti/vscode-snapshots-for-ai"
+    "url": "https://github.com/gbti-network/vscode-snapshots-for-ai"
   },
   "engines": {
     "vscode": "^1.85.0"

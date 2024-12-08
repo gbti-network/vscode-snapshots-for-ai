@@ -16,3 +16,4 @@ scripts/**/*.js.map
 package-lock.json
 .data/
 .snapshots/
+.npmrc
