@@ -1,6 +1,0 @@
-### Added
-- Support for Open VSX Registry (Windfall compatibility)
-- Automated GitHub release creation with changelog notes
-### Fixed
-- GitHub release creation in deployment script
-- Release notes handling
