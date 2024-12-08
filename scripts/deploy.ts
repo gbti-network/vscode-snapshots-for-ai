@@ -42,47 +42,42 @@ async function getChangelogNotes(version: string): Promise<string> {
 }
 
 async function createGitHubRelease(version: string, notes: string) {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+        console.warn('GITHUB_TOKEN not found. Skipping GitHub release.');
+        return;
+    }
+
     try {
-        // Create temporary release notes file
-        const tempNotesPath = path.join(__dirname, 'release-notes.tmp');
-        fs.writeFileSync(tempNotesPath, notes);
+        // Create and push tag
+        await execAsync(`git tag -a v${version} -m "Release v${version}"`);
+        console.log(`Created tag v${version}`);
+        
+        // Add all changes
+        await execAsync('git add .');
+        console.log('Added changes');
+        
+        // Commit changes
+        await execAsync(`git commit -m "Release v${version}"`);
+        console.log('Committed changes');
+        
+        // Push changes and tags
+        await execAsync('git push origin main --tags');
+        console.log('Pushed changes and tags');
 
-        try {
-            // Create and push tag
-            await execAsync(`git tag -a v${version} -m "Release v${version}"`);
-            console.log(`Created tag v${version}`);
-            
-            // Add all changes
-            await execAsync('git add .');
-            console.log('Added changes');
-            
-            // Commit changes
-            await execAsync(`git commit -m "Release v${version}"`);
-            console.log('Committed changes');
-            
-            // Push changes and tags
-            await execAsync('git push origin main --tags');
-            console.log('Pushed changes and tags');
+        // Create GitHub release using curl
+        const releaseData = JSON.stringify({
+            tag_name: `v${version}`,
+            name: `Release v${version}`,
+            body: notes,
+            draft: false,
+            prerelease: false
+        }).replace(/"/g, '\\"');
 
-            // Create GitHub release using gh CLI
-            await execAsync(
-                `gh release create v${version} --title "Release v${version}" --notes-file "${tempNotesPath}"`,
-                { 
-                    env: { 
-                        ...process.env,
-                        GH_TOKEN: process.env.GITHUB_TOKEN 
-                    }
-                }
-            );
-            console.log('Created GitHub release');
-
-        } finally {
-            // Clean up temporary file
-            if (fs.existsSync(tempNotesPath)) {
-                fs.unlinkSync(tempNotesPath);
-            }
-        }
-
+        const curlCommand = `curl -X POST -H "Authorization: token ${token}" -H "Content-Type: application/json" -d "${releaseData}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        
+        await execAsync(curlCommand);
+        console.log('Created GitHub release');
         console.log(`GitHub release v${version} created successfully!`);
     } catch (error) {
         console.error('Error creating GitHub release:', error);
