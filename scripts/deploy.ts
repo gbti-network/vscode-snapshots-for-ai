@@ -242,6 +242,10 @@ async function deploy() {
         packageJson.version = newVersion;
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
+        // Get changelog content before committing
+        const changelogContent = await getChangelogContent(newVersion);
+        console.log('Changelog content:', changelogContent);
+
         if (!githubOnly) {
             // Clean and prepare
             console.log('Cleaned output directories');
@@ -264,7 +268,6 @@ async function deploy() {
         }
 
         // Create GitHub release with changelog content
-        const changelogContent = await getChangelogContent(newVersion);
         await createGitHubRelease(newVersion, changelogContent);
 
         if (shouldPublish && !githubOnly) {
