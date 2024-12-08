@@ -1,0 +1,18 @@
+out
+node_modules
+.vscode-test/
+*.vsix
+.DS_Store
+.env
+# Compiled script files
+scripts/**/*.js
+scripts/**/*.js.map
+.product/assets/Docs/Video/featuredimage.jpg
+.product/assets/Docs/Video/
+.snapshots/snapshot-2024-12-08T20_22_36_996Z.md
+.product/assets/PSD/featured-image.psd
+.product/assets/
+.env.example
+package-lock.json
+.data/
+.snapshots/
