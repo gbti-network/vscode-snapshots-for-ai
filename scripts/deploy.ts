@@ -41,6 +41,32 @@ async function getChangelogNotes(version: string): Promise<string> {
     return notes.trim();
 }
 
+async function getChangelogContent(version: string): Promise<string> {
+    const changelogPath = path.join(__dirname, '..', '.product', 'changelog.md');
+    const changelog = fs.readFileSync(changelogPath, 'utf8');
+    
+    // Find the section for this version
+    const versionHeader = `## [${version}]`;
+    const lines = changelog.split('\n');
+    let content = [];
+    let isInVersion = false;
+    
+    for (const line of lines) {
+        if (line.startsWith('## [')) {
+            if (line.startsWith(versionHeader)) {
+                isInVersion = true;
+                content.push(line);
+            } else if (isInVersion) {
+                break;
+            }
+        } else if (isInVersion) {
+            content.push(line);
+        }
+    }
+    
+    return content.join('\n').trim();
+}
+
 async function createGitHubRelease(version: string, notes: string) {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
@@ -65,11 +91,14 @@ async function createGitHubRelease(version: string, notes: string) {
         await execAsync('git push origin main --tags');
         console.log('Pushed changes and tags');
 
+        // Get changelog content for this version
+        const changelogContent = await getChangelogContent(version);
+        
         // Create GitHub release using curl
         const releaseData = JSON.stringify({
             tag_name: `v${version}`,
             name: `Release v${version}`,
-            body: notes,
+            body: changelogContent || notes, // Use changelog if available, otherwise use notes
             draft: false,
             prerelease: false
         }).replace(/"/g, '\\"');
