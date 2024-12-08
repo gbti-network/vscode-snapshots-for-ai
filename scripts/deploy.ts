@@ -92,41 +92,31 @@ async function createGitHubRelease(version: string, notes: string) {
         console.log('Pushed changes and tags');
 
         // Create GitHub release using curl
-        const releaseData = JSON.stringify({
+        const releaseData = {
             tag_name: `v${version}`,
             name: `Release v${version}`,
-            body: notes, 
+            body: notes,
             draft: false,
             prerelease: false
-        }).replace(/"/g, '\\"');
+        };
 
-        const curlCommand = `curl -X POST -H "Authorization: token ${token}" -H "Content-Type: application/json" -d "${releaseData}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        console.log('Release notes:', notes);
         
-        await execAsync(curlCommand);
+        // Convert to JSON and escape properly for Windows cmd
+        const jsonData = JSON.stringify(releaseData)
+            .replace(/"/g, '\\"')
+            .replace(/\$/g, '\\$');
+
+        const curlCommand = `curl -v -X POST -H "Authorization: token ${token}" -H "Content-Type: application/json" -d "${jsonData}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        
+        const result = await execAsync(curlCommand);
+        console.log('Curl response:', result);
         console.log('Created GitHub release');
         console.log(`GitHub release v${version} created successfully!`);
     } catch (error) {
         console.error('Error creating GitHub release:', error);
         throw error;
     }
-}
-
-function incrementVersion(currentVersion: string, versionType: 'major' | 'minor' | 'patch'): string {
-    const versionParts = currentVersion.split('.').map(Number);
-    switch (versionType) {
-        case 'major':
-            versionParts[0]++;
-            versionParts[1] = 0;
-            versionParts[2] = 0;
-            break;
-        case 'minor':
-            versionParts[1]++;
-            versionParts[2] = 0;
-            break;
-        default:
-            versionParts[2]++;
-    }
-    return versionParts.join('.');
 }
 
 async function getReleaseNotes(): Promise<string> {
@@ -286,6 +276,24 @@ async function deploy() {
         console.error('Deployment failed:', error);
         process.exit(1);
     }
+}
+
+function incrementVersion(currentVersion: string, versionType: 'major' | 'minor' | 'patch'): string {
+    const versionParts = currentVersion.split('.').map(Number);
+    switch (versionType) {
+        case 'major':
+            versionParts[0]++;
+            versionParts[1] = 0;
+            versionParts[2] = 0;
+            break;
+        case 'minor':
+            versionParts[1]++;
+            versionParts[2] = 0;
+            break;
+        default:
+            versionParts[2]++;
+    }
+    return versionParts.join('.');
 }
 
 // Run the deployment
