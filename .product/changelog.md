@@ -2,6 +2,10 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.28] - 2024-12-09
+### Fixed
+- Fixing misc spelling errors in markdown content.
+
 ## [8.1.27] - 2024-12-08
 ### Fixed
 - Fixing Bugherd link.
