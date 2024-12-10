@@ -1,3 +1,29 @@
-Snapshots for AI helps generate machine-readable markdown snapshots of files that users are currently working on. This plugin empowers developers by providing an efficient way to document and share their codebase structure and content with large languages models (LLMS) such as ChatGPT, Claude.AI, and Grok, enabling a new level of interaction and analysis with your code.
+Create perfect code context for AI interactions! Snapshots for AI is a powerful VS Code extension that helps you generate well-formatted markdown snapshots of your code, making it easier to share context with AI assistants like ChatGPT, Claude, and others.
 
-The plugin offers flexible configuration options, allowing users to include or exclude specific files and patterns, ensuring that only the relevant parts of the project are captured. Additionally, users can choose to document the entire project structure or focus on individual files, tailoring the snapshots to their specific needs. With Snapshots for AI, you can enhance your development workflow, improve documentation practices, and leverage the power of AI to take your coding experience to new heights.
+## Key Features
+
+### One-Click Snapshots
+- Create snapshots instantly using the camera icon in your editor, with automatic code formatting and syntax highlighting
+- Includes file structure and relevant context
+
+### Smart Selection
+- Choose specific files or include entire project structure with intelligent filtering and real-time updates
+- Quick select/deselect all functionality
+
+### Perfect Formatting
+- Generate clean, well-structured markdown with proper syntax highlighting and hierarchical project visualization
+- Optimized for AI consumption
+
+### AI-Ready Output
+- Create context-rich snapshots optimized for AI consumption, perfect for RAG (Retrieval Augmented Generation)
+- Works with all major AI assistants
+- Maintains code structure and relationships
+
+## Getting Started
+
+1. Install the extension
+2. Open any file in your project
+3. Click the camera icon in the editor title bar
+4. Select files to include in your snapshot
+5. Add an optional prompt or description
+6. Your snapshot is ready to share with AI!

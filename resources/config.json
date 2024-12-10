@@ -118,7 +118,8 @@
         "*.obj",
         "*.lib",
         "*.a",
-        "*.map"
+        "*.map",
+        ".npmrc"
     ],
     "default": {
         "default_prompt": "Enter your prompt here",
