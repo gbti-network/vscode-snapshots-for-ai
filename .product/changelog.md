@@ -2,7 +2,7 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
-## [8.1.29] - 2024-12-09
+## [8.1.30] - 2024-12-09
 ### Changed
 - Updated config to exclude sensitive files (.npmrc) and internal directories (.product, .data)
 
