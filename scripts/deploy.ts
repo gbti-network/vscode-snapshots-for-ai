@@ -221,7 +221,12 @@ async function packageExtension() {
 }
 
 async function publishExtension() {
-    console.log('Publishing extension...');
+    console.log('Publishing to VS Code Marketplace...');
+    
+    // Get current version
+    const packageJsonPath = path.join(__dirname, '..', 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const version = packageJson.version;
     
     // Set VSCE_PAT environment variable for the publish command
     const env = { ...process.env };
@@ -231,7 +236,22 @@ async function publishExtension() {
         throw new Error('VSCE_PAT environment variable is required for publishing');
     }
     
-    await execAsync('npx vsce publish', { env });
+    try {
+        const result = await execAsync('npx vsce publish', { env });
+        console.log('VS Code Marketplace publish output:', result.stdout);
+        
+        // Verify the publish was successful
+        if (!result.stdout.includes('Published') && !result.stdout.includes('success')) {
+            throw new Error('VS Code Marketplace publish may have failed - unexpected output');
+        }
+        
+        console.log(`Successfully published version ${version} to VS Code Marketplace`);
+        console.log('Note: The extension will be reviewed by the marketplace team before it becomes available');
+        console.log('You should receive an email notification when the review is complete');
+    } catch (error) {
+        console.error('Failed to publish to VS Code Marketplace:', error);
+        throw error;
+    }
 }
 
 async function publishToOpenVSX() {
@@ -241,11 +261,24 @@ async function publishToOpenVSX() {
         return;
     }
 
+    // Get current version
+    const packageJsonPath = path.join(__dirname, '..', 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const version = packageJson.version;
+
     try {
-        await execAsync('npx ovsx publish', {
+        const result = await execAsync('npx ovsx publish', {
             env: { ...process.env, OVSX_PAT: token }
         });
-        console.log('Published to Open VSX Registry successfully');
+        console.log('Open VSX Registry publish output:', result.stdout);
+        
+        // Verify the publish was successful
+        if (!result.stdout.includes('Published') && !result.stdout.includes('success')) {
+            throw new Error('Open VSX Registry publish may have failed - unexpected output');
+        }
+        
+        console.log(`Successfully published version ${version} to Open VSX Registry`);
+        console.log('The extension should be available on Open VSX Registry shortly');
     } catch (error) {
         console.error('Failed to publish to Open VSX Registry:', error);
         throw error;

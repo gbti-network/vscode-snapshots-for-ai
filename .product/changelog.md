@@ -2,7 +2,7 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
-## [8.1.36] - 2024-12-09
+## [8.1.37] - 2024-12-09
 ### Changed
 - Improving package.json file and readme
 - Improving release scripts to include .visx file in github release
