@@ -2,6 +2,11 @@
 
 All notable changes to the "Snapshots for AI" extension will be documented in this file.
 
+## [8.1.33] - 2024-12-09
+### Changed
+- Improving package.json file and readme
+- We have rounded 800 downloads, let's go! 🚀  
+
 ## [8.1.31] - 2024-12-09
 ### Changed
 - Updated config to exclude sensitive files (.npmrc) and internal directories (.product, .data)
