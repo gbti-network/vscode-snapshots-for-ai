@@ -254,13 +254,19 @@ async function deploy() {
         const currentVersion = packageJson.version;
         const newVersion = incrementVersion(currentVersion, versionType);
 
+        // Clean directories first
+        await cleanDirectories();
+
         // Update version in package.json
         packageJson.version = newVersion;
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+        console.log(`Updated version to ${newVersion}`);
 
-        // Clean and prepare
-        await cleanDirectories();
-        await installDependencies();
+        // Run npm install to update package-lock.json with new version
+        await execAsync('npm install');
+        console.log('Updated package-lock.json');
+
+        // Now compile and package
         await compileTypeScript();
         await packageExtension();
 
