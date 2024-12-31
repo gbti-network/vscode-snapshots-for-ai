@@ -85,11 +85,21 @@ Customize your snapshots through `.snapshots/config.json`:
 3. Add descriptive prompts for better AI context
 4. Configure exclusion patterns for cleaner snapshots
 
+
+
 ## 🤝 Support
+
+### Join to GBTI Network!!! 🙏🙏🙏
+The GBTI Network is a community of developers who are passionate about open source and community-driven development. Members enjoy access to exclussive tools, resources, a private MineCraft server, a listing in our members directory, co-op opportunities and more.
+
+- Support our work by becoming a [GBTI Network member](https://gbti.network/membership/).
+
+### Other ways to Support:
 
 - 🌟 Star us on [GitHub](https://github.com/gbti-network/vscode-snapshots-for-ai)
 - 🐛 Report issues on our [Issue Tracker](https://github.com/gbti-network/vscode-snapshots-for-ai/issues)
 - 💡 Contribute through [Pull Requests](https://github.com/gbti-network/vscode-snapshots-for-ai/pulls)
+- ⭐ Rate us on [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=GBTI.snapshots-for-ai&ssr=false#review-details)
 
 ## 📄 License
 
