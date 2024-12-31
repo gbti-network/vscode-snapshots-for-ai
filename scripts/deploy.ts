@@ -100,7 +100,14 @@ async function createGitHubRelease(version: string, changelogContent: string) {
         await execAsync('git push origin main --tags');
         console.log('Pushed changes and tags');
 
-        // Create GitHub release with changelog content
+        // Find the VSIX file
+        const files = fs.readdirSync('.');
+        const vsixFile = files.find(file => file.endsWith('.vsix'));
+        if (!vsixFile) {
+            throw new Error('No VSIX file found in directory');
+        }
+
+        // Create GitHub release with changelog content and VSIX file
         console.log('Release notes:', changelogContent);
         const releaseData = {
             tag_name: tag,
@@ -114,15 +121,20 @@ async function createGitHubRelease(version: string, changelogContent: string) {
         const tempFile = path.join(__dirname, 'release-data.json');
         fs.writeFileSync(tempFile, JSON.stringify(releaseData));
 
-        // Use the temporary file in the curl command
-        const curlCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "@${tempFile}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
-        const response = await execAsync(curlCommand);
+        // Create the release first
+        const createReleaseCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "@${tempFile}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+        const response = await execAsync(createReleaseCommand);
+        const releaseResponse = JSON.parse(response.stdout);
         
         // Clean up the temporary file
         fs.unlinkSync(tempFile);
 
-        console.log('Curl response:', response);
-        console.log('Created GitHub release');
+        // Upload the asset to the release
+        const uploadUrl = releaseResponse.upload_url.replace(/{.*}/, '');
+        const uploadCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/octet-stream" --data-binary "@${vsixFile}" "${uploadUrl}?name=${vsixFile}"`;
+        await execAsync(uploadCommand);
+
+        console.log('Created GitHub release with VSIX file attached');
         console.log(`GitHub release ${tag} created successfully!`);
     } catch (error) {
         console.error('Failed to create GitHub release:', error);
@@ -222,74 +234,49 @@ async function publishToOpenVSX() {
 
 async function deploy() {
     try {
-        const args = process.argv.slice(2);
-        const versionType = args[0] || 'patch';
-        const shouldPublish = args.includes('--publish');
-        const githubOnly = args.includes('--github-only');
+        const versionType = process.argv[2] as 'major' | 'minor' | 'patch' || 'patch';
+        const githubOnly = process.argv.includes('--github-only');
 
-        if (!['major', 'minor', 'patch'].includes(versionType)) {
-            console.error('Invalid version type. Use: major, minor, or patch');
-            process.exit(1);
+        if (!process.env.GITHUB_TOKEN) {
+            throw new Error('GITHUB_TOKEN environment variable is required');
         }
 
-        // Get current version
+        // Non-GitHub deployment requirements
+        if (!githubOnly && !process.env.VSCE_PAT) {
+            throw new Error('VSCE_PAT environment variable is required for full deployment');
+        }
+
+        console.log(`Starting ${githubOnly ? 'GitHub-only' : 'full'} deployment...`);
+
+        // Get current version from package.json
         const packageJsonPath = path.join(__dirname, '..', 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
         const currentVersion = packageJson.version;
+        const newVersion = incrementVersion(currentVersion, versionType);
 
-        // Increment version
-        const newVersion = incrementVersion(currentVersion, versionType as 'major' | 'minor' | 'patch');
-        console.log(`Incremented version to ${newVersion} (${versionType})`);
-
-        // Get changelog content before updating package.json
-        let changelogContent = await getChangelogContent(newVersion);
-        if (!changelogContent) {
-            console.log(`No changelog entry found for version ${newVersion}. Must be an oversight.`);
-            changelogContent = 'Changes not documented. Must be an oversight.';
-        }
-        console.log('Changelog content:', changelogContent);
-
-        // Update package.json with new version
+        // Update version in package.json
         packageJson.version = newVersion;
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-        if (!githubOnly) {
-            // Clean and prepare
-            console.log('Cleaned output directories');
-            await cleanDirectories();
+        // Clean and prepare
+        await cleanDirectories();
+        await installDependencies();
+        await compileTypeScript();
+        await packageExtension();
 
-            // Install dependencies
-            console.log('Installing dependencies...');
-            await installDependencies();
-            console.log('Dependencies installed');
+        // Get changelog content for the release
+        const changelogContent = await getChangelogContent(newVersion);
 
-            // Compile TypeScript
-            console.log('Compiling TypeScript...');
-            await compileTypeScript();
-            console.log('TypeScript compilation successful');
-
-            // Package extension
-            console.log('Packaging extension...');
-            await packageExtension();
-            console.log('Extension packaged successfully');
-        }
-
-        // Create GitHub release with changelog content
+        // Create GitHub release with VSIX attachment
         await createGitHubRelease(newVersion, changelogContent);
 
-        if (shouldPublish && !githubOnly) {
-            console.log('Publishing extension...');
-            // Publish to VS Code Marketplace
+        if (!githubOnly) {
+            // Publish to marketplaces only if not GitHub-only
             await publishExtension();
-            console.log('Extension published to VS Code Marketplace');
-
-            // Publish to Open VSX Registry
             await publishToOpenVSX();
-            console.log('Extension published to Open VSX Registry');
-            console.log('Published to Open VSX Registry successfully');
         }
 
-        console.log('Deployment completed successfully!');
+        console.log(`${githubOnly ? 'GitHub-only deployment' : 'Full deployment'} completed successfully!`);
     } catch (error) {
         console.error('Deployment failed:', error);
         process.exit(1);
