@@ -191,13 +191,33 @@ async function compileTypeScript() {
 async function packageExtension() {
     console.log('Packaging extension...');
     
+    // Get current version from package.json
+    const packageJsonPath = path.join(__dirname, '..', 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const version = packageJson.version;
+    
     // Set VSCE_PAT environment variable for the package command
     const env = { ...process.env };
     if (process.env.VSCE_PAT) {
         env.VSCE_PAT = process.env.VSCE_PAT;
     }
     
-    await execAsync('npx vsce package', { env });
+    // Force clean any existing VSIX files
+    const vsixFiles = fs.readdirSync(path.join(__dirname, '..')).filter(file => file.endsWith('.vsix'));
+    for (const file of vsixFiles) {
+        fs.unlinkSync(path.join(__dirname, '..', file));
+    }
+    
+    // Package with explicit version
+    await execAsync(`npx vsce package ${version}`, { env });
+    console.log(`Packaged version ${version}`);
+    
+    // Verify the VSIX file exists with correct version
+    const expectedVsix = `snapshots-for-ai-${version}.vsix`;
+    const vsixPath = path.join(__dirname, '..', expectedVsix);
+    if (!fs.existsSync(vsixPath)) {
+        throw new Error(`Failed to create VSIX file: ${expectedVsix}`);
+    }
 }
 
 async function publishExtension() {
