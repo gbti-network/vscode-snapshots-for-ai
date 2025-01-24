@@ -112,7 +112,7 @@ async function createGitHubRelease(version: string, changelogContent: string) {
         const releaseData = {
             tag_name: tag,
             name: `Release ${tag}`,
-            body: changelogContent || '',
+            body: changelogContent || `Release ${tag} - No changelog content available`,
             draft: false,
             prerelease: false
         };
@@ -121,21 +121,38 @@ async function createGitHubRelease(version: string, changelogContent: string) {
         const tempFile = path.join(__dirname, 'release-data.json');
         fs.writeFileSync(tempFile, JSON.stringify(releaseData));
 
-        // Create the release first
-        const createReleaseCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "@${tempFile}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
-        const response = await execAsync(createReleaseCommand);
-        const releaseResponse = JSON.parse(response.stdout);
-        
-        // Clean up the temporary file
-        fs.unlinkSync(tempFile);
+        try {
+            // Create the release first
+            const createReleaseCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/json" -d "@${tempFile}" https://api.github.com/repos/gbti-network/vscode-snapshots-for-ai/releases`;
+            const response = await execAsync(createReleaseCommand);
+            const releaseResponse = JSON.parse(response.stdout);
+            
+            if (!releaseResponse || !releaseResponse.upload_url) {
+                throw new Error('Invalid response from GitHub API: ' + response.stdout);
+            }
 
-        // Upload the asset to the release
-        const uploadUrl = releaseResponse.upload_url.replace(/{.*}/, '');
-        const uploadCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/octet-stream" --data-binary "@${vsixFile}" "${uploadUrl}?name=${vsixFile}"`;
-        await execAsync(uploadCommand);
+            // Clean up the temporary file
+            fs.unlinkSync(tempFile);
 
-        console.log('Created GitHub release with VSIX file attached');
-        console.log(`GitHub release ${tag} created successfully!`);
+            // Upload the asset to the release
+            const uploadUrl = releaseResponse.upload_url.replace(/{.*}/, '');
+            const uploadCommand = `curl -X POST -H "Authorization: token ${process.env.GITHUB_TOKEN}" -H "Content-Type: application/octet-stream" --data-binary "@${vsixFile}" "${uploadUrl}?name=${vsixFile}"`;
+            await execAsync(uploadCommand);
+
+            console.log('Created GitHub release with VSIX file attached');
+            console.log(`GitHub release ${tag} created successfully!`);
+        } catch (error: any) {
+            console.error('GitHub API Error:', error);
+            if (error?.stdout) {
+                console.error('Response:', error.stdout);
+            }
+            throw new Error('Failed to create GitHub release: ' + (error?.message || 'Unknown error'));
+        } finally {
+            // Ensure temp file is cleaned up even if there's an error
+            if (fs.existsSync(tempFile)) {
+                fs.unlinkSync(tempFile);
+            }
+        }
     } catch (error) {
         console.error('Failed to create GitHub release:', error);
         throw error;
