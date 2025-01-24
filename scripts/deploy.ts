@@ -301,6 +301,9 @@ async function deploy() {
 
         console.log(`Starting ${githubOnly ? 'GitHub-only' : 'full'} deployment...`);
 
+        // First, ensure package-lock is in sync with current state
+        await execAsync('npm install --package-lock-only');
+        
         // Get current version from package.json
         const packageJsonPath = path.join(__dirname, '..', 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
@@ -315,9 +318,19 @@ async function deploy() {
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
         console.log(`Updated version to ${newVersion}`);
 
-        // Run npm install to update package-lock.json with new version
+        // Update package-lock.json to match new version
+        await execAsync('npm install --package-lock-only');
+        
+        // Verify versions are in sync
+        const packageLockPath = path.join(__dirname, '..', 'package-lock.json');
+        const packageLock = JSON.parse(fs.readFileSync(packageLockPath, 'utf8'));
+        if (packageLock.version !== newVersion || packageLock.packages[''].version !== newVersion) {
+            throw new Error('Version mismatch detected between package.json and package-lock.json');
+        }
+        
+        // Install dependencies with the new versions
         await execAsync('npm install');
-        console.log('Updated package-lock.json');
+        console.log('Updated package-lock.json and installed dependencies');
 
         // Now compile and package
         await compileTypeScript();
