@@ -1,0 +1,50 @@
+# Snapshots directory - may contain sensitive file contents
+.snapshots/
+
+# Environment files - contain secrets
+.env
+.env.*
+.env.example
+
+# Development and build files
+.git/
+.github/
+.gitignore
+.vscode/
+.idea/
+node_modules/
+out/
+src/
+scripts/
+*.ts
+tsconfig.json
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# Product/marketing assets
+.product/
+.data/
+.marketing/
+
+# Test files
+.vscode-test/
+**/*.test.ts
+**/*.spec.ts
+coverage/
+
+# Build artifacts
+*.vsix
+*.map
+
+# Documentation (keep README.md for marketplace)
+CONTRIBUTING.md
+CHANGELOG.md
+
+# Misc
+.DS_Store
+*.log
+*.tmp
+*.bak
+.npmrc
+package-lock.json
